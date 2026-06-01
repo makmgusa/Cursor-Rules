@@ -1,0 +1,17 @@
+---
+alwaysApply: true
+---
+Keep implementations simple and avoid unnecessary abstraction.
+- Prefer the smallest working design.
+- Avoid introducing a class unless at least one is true:
+  - Shared mutable state must persist across operations.
+  - Multiple instances are required.
+  - Explicit lifecycle management is required.
+- Do not introduce new adapter/registry/helper abstractions until the immediate phase requires them.
+  - If a domain model exists in Project plan.md, implement against it directly before creating parallel temporary models.
+  - If a layer is introduced early, include a one-line comment explaining the immediate requirement it satisfies.
+- Keep control flow shallow:
+  - Max 2 nesting levels per function.
+- Keep functions small and single-purpose (target ~20 lines, soft limit).
+- If two designs are valid, choose the one with fewer abstractions.
+- Refactor for clarity before adding new patterns or layers.

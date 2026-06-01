@@ -1,0 +1,5 @@
+---
+description: Clarify before doing extensive and/or broad analysis
+alwaysApply: false
+---
+- Prefer asking a few targeted questions when requirements are ambiguous, instead of listing many possible approaches. For design and architecture, present a small set of options with tradeoffs. For explanations, be brief and on point. If the user’s request is already specific, implement or answer without extra clarification.

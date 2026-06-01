@@ -1,0 +1,5 @@
+---
+alwaysApply: true
+---
+- Prefer short summaries instead of verbose descriptions
+- If a request would cause a significant update to one or more files, ask before updating the files.

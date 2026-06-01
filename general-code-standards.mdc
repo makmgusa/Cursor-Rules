@@ -1,0 +1,9 @@
+---
+alwaysApply: true
+---
+- comment the code
+- Object Oriented Programming is preferred.
+    - Use common design patterns when appropriate. Call out the pattern in the comments.
+- Prefer direct names like start, scanProducts, setPriceTier, renderBadge
+- Whenever possible, there should only be one source of truth. Some examples include putting server settings in a script instead of documenting them; application version should be in one variable/object and the rest of the application should then reference that variable/object.
+- Prefer single entry and exit point per code unit (function, etc). Guard clauses and continue are acceptable only in functions under ~10 lines. 

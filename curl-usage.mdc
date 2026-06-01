@@ -1,0 +1,6 @@
+---
+description: before usng curl apply this rule
+alwaysApply: false
+---
+- Anytime curl for an install is considered, first discuss the need for the install, 
+the downsides of curl installs (manual uninstall) and possible alternatives.

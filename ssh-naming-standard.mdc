@@ -1,0 +1,5 @@
+---
+description: SSH key naming standard
+alwaysApply: false
+---
+- Any SSH key should be named for its purpose, not the algorithm (e.g. deploy_mklimp, not id_ed25519).
