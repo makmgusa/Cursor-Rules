@@ -3,3 +3,4 @@ alwaysApply: true
 ---
 - Prefer short summaries instead of verbose descriptions
 - If a request would cause a significant update to one or more files, ask before updating the files.
+- In documentation, write the desired behavior. "Do not", "don't", and "never" belong only on real constraints (safety, security, invariants).
