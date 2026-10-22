@@ -4,3 +4,4 @@ alwaysApply: true
 - Prefer short summaries instead of verbose descriptions
 - If a request would cause a significant update to one or more files, ask before updating the files.
 - In documentation, write the desired behavior. "Do not", "don't", and "never" belong only on real constraints (safety, security, invariants).
+- Keep docs focused on current decisions, active work, verified results, and alternatives with continuing value. Skip absent technologies, unused tools, rejected options, and cleanup ideas when they are only context completion. Preserve failed or costly designs when they explain a decision, prevent repeating known work, or remain a viable alternative for later.
