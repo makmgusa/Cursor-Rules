@@ -53,6 +53,13 @@ printf '\nPull results:\n'
 for rules_dir in "${rules_dirs[@]}"; do
   printf '\n%s\n' "$rules_dir"
 
+  if [[ ! -e "$rules_dir/.git" ]]; then
+    ((failures += 1))
+    printf 'Result: failed\n'
+    printf 'Reason: imported Cursor-Rules directory is not a git clone. Run clone-cursor-rules.sh to fix it.\n'
+    continue
+  fi
+
   if output="$(git -C "$rules_dir" pull --ff-only 2>&1)"; then
     ((successes += 1))
     printf 'Result: success\n'
