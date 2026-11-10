@@ -26,7 +26,9 @@ script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 source_repo="$(git -C "$script_dir" rev-parse --show-toplevel)"
 source_remote="$(git -C "$source_repo" remote get-url origin)"
 projects_root="${1:-$HOME/Code}"
-rules_path=".cursor/rules/imported/Cursor-Rules"
+imports_path=".cursor/rules/imported"
+rules_path="$imports_path/Cursor-Rules"
+exclude_pattern="/$imports_path/"
 
 if [[ ! -d "$projects_root" ]]; then
   printf 'Projects root not found: %s\n' "$projects_root" >&2
@@ -56,34 +58,45 @@ clone_rules() {
   git clone "$source_remote" "$target_dir"
 }
 
-backup_path() {
-  local target_dir="$1"
-  local backup="${target_dir}.backup-$(date +%Y%m%d%H%M%S)"
-  local suffix=1
-
-  while [[ -e "$backup" ]]; do
-    backup="${target_dir}.backup-$(date +%Y%m%d%H%M%S)-$suffix"
-    ((suffix += 1))
-  done
-
-  printf '%s\n' "$backup"
-}
-
+# Clone to a temporary sibling first, so a failed clone leaves the copy intact.
 convert_copy_to_clone() {
   local target_dir="$1"
-  local backup
+  local temp_dir
 
-  backup="$(backup_path "$target_dir")"
-  mv -- "$target_dir" "$backup"
+  temp_dir="$(mktemp -d "${target_dir}.new.XXXXXX")"
 
-  if clone_rules "$target_dir"; then
-    printf 'Backup: %s\n' "$backup"
+  if git clone "$source_remote" "$temp_dir"; then
+    rm -rf -- "$target_dir"
+    mv -- "$temp_dir" "$target_dir"
     return 0
   fi
 
-  rm -rf -- "$target_dir"
-  mv -- "$backup" "$target_dir"
+  rm -rf -- "$temp_dir"
   return 1
+}
+
+# Imports are not versioned in project repos. Exclude them locally, without
+# editing any tracked file in the project.
+ensure_excluded() {
+  local repo="$1"
+  local exclude_file
+
+  exclude_file="$(git -C "$repo" rev-parse --path-format=absolute --git-path info/exclude)"
+  mkdir -p -- "$(dirname -- "$exclude_file")"
+
+  if ! grep -qxF "$exclude_pattern" "$exclude_file" 2>/dev/null; then
+    printf '%s\n' "$exclude_pattern" >>"$exclude_file"
+  fi
+}
+
+# Print a hint when the project repo still tracks files from an older copied import.
+hint_if_tracked() {
+  local repo="$1"
+
+  if [[ -n "$(git -C "$repo" ls-files -- "$imports_path")" ]]; then
+    printf 'Note: this repo still tracks files under %s. To stop tracking them, run:\n' "$imports_path"
+    printf '  git -C "%s" rm -r --cached %s\n' "$repo" "$imports_path"
+  fi
 }
 
 mapfile -t project_repos < <(
@@ -119,6 +132,11 @@ for repo in "${project_repos[@]}"; do
 
   if [[ -e "$target_dir/.git" ]]; then
     ((already_cloned += 1))
+    ensure_excluded "$repo"
+    if [[ -n "$(git -C "$repo" ls-files -- "$imports_path")" ]]; then
+      printf '\n%s\n' "$repo"
+      hint_if_tracked "$repo"
+    fi
     continue
   fi
 
@@ -129,6 +147,7 @@ for repo in "${project_repos[@]}"; do
     if ask_yes_no "Clone Cursor-Rules into this repo?"; then
       if clone_rules "$target_dir"; then
         ((cloned += 1))
+        ensure_excluded "$repo"
         printf 'Result: cloned\n'
       else
         ((failed += 1))
@@ -143,10 +162,12 @@ for repo in "${project_repos[@]}"; do
 
   if [[ -d "$target_dir" ]]; then
     printf 'State: copied rules import, not a clone\n'
-    if ask_yes_no "Replace copied rules with a cloned repo?"; then
+    if ask_yes_no "Replace copied rules with a cloned repo (no backup is kept)?"; then
       if convert_copy_to_clone "$target_dir"; then
         ((converted += 1))
+        ensure_excluded "$repo"
         printf 'Result: converted\n'
+        hint_if_tracked "$repo"
       else
         ((failed += 1))
         printf 'Result: failed\n'

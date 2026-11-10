@@ -13,6 +13,8 @@ Any time rules are updated in this repo, commit and push the changes, then run s
 Projects import this repo at:
 `.cursor/rules/imported/Cursor-Rules`
 
+This repo is the only place the rules are versioned. The clone script adds `.cursor/rules/imported/` to each project's `.git/info/exclude` so project repos do not track the imports. If a project still tracks files from an older copied import, the script prints the `git rm -r --cached` command to stop tracking them.
+
 After updating rules in this repo, commit and push the changes, then run:
 `./sync-cursor-rules.sh`
 
